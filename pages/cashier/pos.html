@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of Sale</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <div class="pos-container">
+        <nav>
+            <h2>Cashier System</h2>
+            <a href="../../index.html">Logout</a>
+        </nav>
+
+        <div class="pos-grid">
+            <div class="product-list">
+                <h3>Products</h3>
+                <div id="productGrid">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+
+            <div class="cart">
+                <h3>Shopping Cart</h3>
+                <table id="cartTable">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Cart items will be added here -->
+                    </tbody>
+                </table>
+                <div class="cart-total">
+                    <h4>Total: <span id="totalAmount">0</span></h4>
+                    <button id="checkoutBtn">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html>
