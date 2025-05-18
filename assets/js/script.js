@@ -1,83 +1,68 @@
-// Function to handle login
-function handleLogin(event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value;
+// Fungsi validasi form
+function validateForm() {
+    const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('error-message');
     
-    // Here you would typically make an API call to verify credentials
-    // For demo purposes, we'll use simple logic
-    if (username === 'admin' && password === 'admin123') {
-        window.location.href = 'pages/admin/sales-analysis.html';
-    } else if (username === 'cashier' && password === 'cashier123') {
-        window.location.href = 'pages/cashier/pos.html';
-    } else {
-        alert('Invalid credentials!');
+    if (username.length < 3) {
+        errorDiv.textContent = 'Username minimal 3 karakter!';
+        return false;
     }
-}
-
-// Function to add product to cart
-function addToCart(productId, productName, price) {
-    const cartTable = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
-    const row = cartTable.insertRow();
-    row.innerHTML = `
-        <td>${productName}</td>
-        <td>${price}</td>
-        <td><input type="number" value="1" min="1" onchange="updateTotal(this)"></td>
-        <td>${price}</td>
-        <td><button onclick="removeItem(this)">Remove</button></td>
-    `;
-    updateCartTotal();
-}
-
-// Function to update cart total
-function updateCartTotal() {
-    const cartTable = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
-    let total = 0;
-    for (let row of cartTable.rows) {
-        total += parseFloat(row.cells[3].innerHTML);
+    
+    if (password.length < 6) {
+        errorDiv.textContent = 'Password minimal 6 karakter!';
+        return false;
     }
-    document.getElementById('totalAmount').innerHTML = total.toFixed(2);
+    
+    return true;
 }
 
-// Function to remove item from cart
-function removeItem(button) {
-    const row = button.parentNode.parentNode;
-    row.parentNode.removeChild(row);
-    updateCartTotal();
-}
+// Perbaikan pada fungsi handleCheckout
+async function handleCheckout() {
+    try {
+        const cartItems = [];
+        const cartTable = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
+        
+        if (cartTable.rows.length === 0) {
+            alert('Keranjang belanja kosong!');
+            return;
+        }
 
-// Function to handle checkout
-function handleCheckout() {
-    const cartItems = [];
-    const cartTable = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
-    for (let row of cartTable.rows) {
-        cartItems.push({
-            product: row.cells[0].innerHTML,
-            price: row.cells[1].innerHTML,
-            quantity: row.cells[2].getElementsByTagName('input')[0].value,
-            total: row.cells[3].innerHTML
+        for (let row of cartTable.rows) {
+            const quantity = parseInt(row.cells[2].getElementsByTagName('input')[0].value);
+            const price = parseFloat(row.cells[1].innerHTML);
+            
+            if (quantity <= 0 || isNaN(quantity)) {
+                alert('Jumlah produk tidak valid!');
+                return;
+            }
+            
+            cartItems.push({
+                product: row.cells[0].innerHTML,
+                price: price,
+                quantity: quantity,
+                total: price * quantity
+            });
+        }
+        
+        // Simpan ke database (contoh menggunakan fetch API)
+        const response = await fetch('save_transaction.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': sessionStorage.getItem('csrf_token')
+            },
+            body: JSON.stringify(cartItems)
         });
+        
+        if (!response.ok) throw new Error('Gagal menyimpan transaksi');
+        
+        alert('Transaksi berhasil!');
+        cartTable.innerHTML = '';
+        updateCartTotal();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan: ' + error.message);
     }
-    
-    // Here you would typically send this data to your backend
-    // For demo purposes, we'll just log it
-    console.log('Transaction:', cartItems);
-    alert('Transaction completed!');
-    
-    // Clear cart
-    cartTable.innerHTML = '';
-    updateCartTotal();
 }
-
-// Add event listeners when document is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.querySelector('form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', handleCheckout);
-    }
-});
